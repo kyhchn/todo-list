@@ -13,7 +13,7 @@ async function getTasks(page: number) {
   const response = await fetch(
     `${process.env.LOCAL_URL}/api/task?page=${page}&take=${6}`,
     {
-      headers: headers(),
+      headers: new Headers(headers()),
       next: {
         tags: ["task"],
       },
