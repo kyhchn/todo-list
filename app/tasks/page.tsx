@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import Tasks from "@/components/Tasks";
-import { TaskType } from "@/lib/db/schema";
 import ProfileInfo from "@/components/ProfileInfo";
 import SignoutButton from "@/components/SignoutButton";
 import CreateDialog from "@/components/CreateDialog";
@@ -18,62 +17,81 @@ import { Input } from "@/components/ui/input";
 import { urlParamBuilder } from "@/lib/utils";
 import LoadMore from "@/components/LoadMore";
 import { redirect } from "next/navigation";
+import { useInfiniteQuery } from "react-query";
+
+// Debounce hook
+const useDebounce = (value: string, delay: number) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
+const fetchTasks = async (pageParam: number, sort: string, title: string) => {
+  const urlParams = urlParamBuilder({
+    page: pageParam.toString(),
+    take: "6",
+    order: sort,
+    title: title,
+  });
+  const response = await fetch(`/api/task?${urlParams}`);
+  if (response.status !== 200) {
+    throw new Error("Failed to fetch tasks");
+  }
+  return response.json();
+};
 
 const Page = () => {
   const { data: session, status } = useSession();
-  const [tasks, setTasks] = useState<TaskType[]>();
-  const [isLoading, setIsLoading] = useState(false);
-  const [page, setPage] = useState(1);
   const [title, setTitle] = useState("");
-  const [totalPage, setTotalPage] = useState<number>(1);
-  const [sort, setSort] = useState<string>("latest");
+  const [sort, setSort] = useState<string>("nearest");
 
-  const infiniteHandler = () => {
-    if (page < totalPage) {
-      setPage(page + 1);
-    }
-  };
-  async function getTasks() {
-    if (page <= totalPage) {
-      setIsLoading(true);
-      const urlParams = urlParamBuilder({
-        page: page.toString(),
-        take: "6",
-        order: sort,
-        title: title,
-      });
-      const response = await fetch(`/api/task?${urlParams}`);
-      console.log(response);
-      if (response.status != 200) {
-        return null;
-      }
-      const data = await response.json();
-      setTasks(data.data.tasks as TaskType[]);
-      setTotalPage(data.data.totalPages);
-      setIsLoading(false);
-    }
-  }
-  useEffect(() => {
-    const update = setTimeout(() => {
-      getTasks();
-    }, 500);
+  const debouncedTitle = useDebounce(title, 500);
 
-    return () => clearTimeout(update);
-  }, [page, sort, title, totalPage]);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+    isLoading,
+  } = useInfiniteQuery(
+    ["tasks", sort, debouncedTitle],
+    ({ pageParam = 1 }) => fetchTasks(pageParam, sort, debouncedTitle),
+    {
+      getNextPageParam: (lastPage, allPages) => {
+        const { totalPages } = lastPage.data;
+        const nextPage = allPages.length + 1;
+        return nextPage <= totalPages ? nextPage : undefined;
+      },
+    }
+  );
+
+  const tasks = data?.pages.flatMap((page) => page.data.tasks) ?? [];
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      redirect("/auth/sign-in");
+      redirect("/api/auth/signin");
     }
   }, [status]);
+
   return (
     <div className="bg-gradient-to-r from-yellow-100 to-teal-100 min-h-screen">
       {status === "authenticated" && session && (
         <div className="max-w-[calc(100vw-40px)] mx-auto p-10">
           <div className="flex flex-row justify-between items-center">
             <ProfileInfo
-              imageUrl={session!.user!.image}
-              name={session!.user!.name}
+              imageUrl={session.user?.image}
+              name={session.user?.name}
             />
 
             <div className="flex flex-row items-center gap-x-2">
@@ -87,8 +105,8 @@ const Page = () => {
                 <SelectValue placeholder="Deadline" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="latest">Nearest</SelectItem>
-                <SelectItem value="oldest">Furthest</SelectItem>
+                <SelectItem value="nearest">Nearest</SelectItem>
+                <SelectItem value="furthest">Furthest</SelectItem>
               </SelectContent>
             </Select>
 
@@ -100,10 +118,11 @@ const Page = () => {
           </div>
           <Separator className="my-3 bg-slate-300" />
           {tasks && <Tasks tasks={tasks} />}
-          <LoadMore setPage={infiniteHandler} isLoading={isLoading} />
+          <LoadMore setPage={fetchNextPage} isLoading={isLoading} />
         </div>
       )}
     </div>
   );
 };
+
 export default Page;

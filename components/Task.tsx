@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Check, X } from "@phosphor-icons/react/dist/ssr";
-import { useMutation } from "react-query";
+import { useMutation, useQueryClient } from "react-query";
 import revalidateCache from "@/lib/actions/revalidate";
 
 interface pageProps {
@@ -25,13 +25,15 @@ interface pageProps {
 const Task = ({ task }: pageProps) => {
   const { toast } = useToast();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [firstMutate, setFirstMutate] = useState(true);
   const [title, setTitle] = useState(task.title);
   const [deadline, setDeadline] = React.useState<Date | undefined>(
-    new Date(task.deadline)
+    new Date(task.deadline.toString())
   );
   const [desc, setDesc] = React.useState(task.desc);
   const [finish, setFinish] = React.useState<boolean>(task.finish);
+  const taskDeadline = new Date(task.deadline);
 
   const dateNow = new Date();
 
@@ -45,10 +47,7 @@ const Task = ({ task }: pageProps) => {
         method: "PATCH",
         body: JSON.stringify({
           title: title,
-          deadline:
-            new Date(task?.deadline).toISOString !== deadline?.toISOString
-              ? deadline?.toISOString()
-              : null,
+          deadline: deadline?.toISOString(),
           desc: desc,
           finish: finish,
           id: task?.id,
@@ -63,8 +62,11 @@ const Task = ({ task }: pageProps) => {
     {
       onSuccess: (data) => {
         setFirstMutate(false);
-        revalidateCache("task");
-        revalidateCache("task/" + task.id);
+        queryClient.invalidateQueries(["tasks"]);
+        revalidateCache(`task/${task.id}`);
+        toast({
+          description: "Task successfully updated",
+        });
       },
       onError: (error: Error) => {
         toast({
@@ -78,21 +80,28 @@ const Task = ({ task }: pageProps) => {
   useEffect(() => {
     const update = setTimeout(() => {
       if (firstMutate) {
+        console.log("deadline is", deadline?.toISOString());
+        console.log("task date is ", taskDeadline.toISOString());
         if (
           title !== task.title ||
           desc !== task.desc ||
-          new Date(task?.deadline).toISOString !== deadline?.toISOString ||
+          taskDeadline.toISOString() !== deadline?.toISOString() ||
           task.finish !== finish
         ) {
           updateTaskMutation.mutate();
         }
       } else {
+        console.log("Mutation started");
         updateTaskMutation.mutate();
       }
     }, 500);
 
     return () => clearTimeout(update);
   }, [title, finish, deadline, desc]);
+
+  useEffect(() => {
+    console.log("deadline changed ", deadline?.toISOString());
+  }, [deadline]);
 
   return (
     <>

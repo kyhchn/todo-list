@@ -14,10 +14,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import revalidateCache from "@/lib/actions/revalidate";
+import { useQueryClient } from "react-query";
 
 export function DeleteButon({ taskId }: { taskId: number }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleDelete = async () => {
     const res = await fetch(`/api/task/${taskId}`, {
@@ -30,6 +32,7 @@ export function DeleteButon({ taskId }: { taskId: number }) {
     if (res.ok) {
       setIsOpen(false);
       revalidateCache("task");
+      queryClient.invalidateQueries(["tasks"]);
       router.push("/tasks"); // Redirect to homepage or any other page after deletion
     } else {
       // Handle error

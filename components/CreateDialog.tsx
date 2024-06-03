@@ -19,16 +19,14 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Calendar } from "./ui/calendar";
 import { useMutation, useQueryClient } from "react-query";
-import action from "@/lib/actions/revalidate";
-import revalidateCache from "@/lib/actions/revalidate";
 
 const CreateDialog = () => {
   const { toast } = useToast();
   const [input, setInput] = React.useState("");
+  const queryClient = useQueryClient();
   const currentDate = new Date();
   const [date, setDate] = React.useState<Date | undefined>();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const createTaskMutation = useMutation(
     async (formData: FormData) => {
@@ -47,7 +45,7 @@ const CreateDialog = () => {
         toast({
           description: "Success to create todo",
         });
-        revalidateCache("task");
+        queryClient.invalidateQueries(["tasks"]);
         router.push("/tasks/" + data["data"]["task_id"]);
       },
       onError: (error: Error) => {

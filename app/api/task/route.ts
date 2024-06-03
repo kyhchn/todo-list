@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
     const take = parseInt(searchParams.get("take") || "10");
 
     // Validate the orderby parameter if provided
-    const validOrderBys = ["latest", "oldest"];
+    const validOrderBys = ["nearest", "furthest"];
     if (order && !validOrderBys.includes(order)) {
       return NextResponse.json(
         generateBaseResponse({
@@ -95,10 +95,10 @@ export async function GET(req: NextRequest) {
       .limit(take);
 
     if (order) {
-      if (order !== "latest") {
-        query.orderBy(desc($tasks.updatedAt));
+      if (order === "nearest") {
+        query.orderBy($tasks.deadline);
       } else {
-        query.orderBy($tasks.updatedAt);
+        query.orderBy(desc($tasks.deadline));
       }
     }
 

@@ -30,6 +30,12 @@ const authOptions: NextAuthOptions = {
       }
       return token;
     },
+    async redirect({ url, baseUrl }) {
+      console.log("url", url);
+      console.log("baseUrl", baseUrl);
+
+      return url.startsWith(baseUrl) ? url : baseUrl + "/tasks";
+    },
 
     async signIn({ user, account, profile }) {
       const userEmail = profile?.email || user.email;
