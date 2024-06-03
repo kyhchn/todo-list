@@ -45,8 +45,8 @@ export function DeleteButon({ taskId }: { taskId: number }) {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete note from
-            my databases.
+            This action cannot be undone. This will permanently delete task from
+            databases.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

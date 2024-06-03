@@ -2,7 +2,7 @@ import authOptions from "@/lib/authoptions";
 import db from "@/lib/db/drizzle";
 import { $tasks, $users } from "@/lib/db/schema";
 import { generateBaseResponse } from "@/lib/utils";
-import { count } from "drizzle-orm";
+import { count, ilike, like } from "drizzle-orm";
 import { and, desc, eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
@@ -48,13 +48,13 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = req.nextUrl;
     const title = searchParams.get("title");
-    const orderby = searchParams.get("orderby");
+    const order = searchParams.get("order");
     const page = parseInt(searchParams.get("page") || "1");
     const take = parseInt(searchParams.get("take") || "10");
 
     // Validate the orderby parameter if provided
     const validOrderBys = ["latest", "oldest"];
-    if (orderby && !validOrderBys.includes(orderby)) {
+    if (order && !validOrderBys.includes(order)) {
       return NextResponse.json(
         generateBaseResponse({
           success: false,
@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
 
     const conditions = [eq($tasks.authorId, user.id)];
     if (title) {
-      conditions.push(eq($tasks.title, title));
+      conditions.push(ilike($tasks.title, `%${title.trim()}%`));
     }
 
     const totalCountResult = await db
@@ -81,7 +81,10 @@ export async function GET(req: NextRequest) {
       .where(and(...conditions));
 
     const totalCount = totalCountResult[0].count;
-    const totalPages = Math.ceil(totalCount / take);
+    let totalPages = Math.ceil(totalCount / take);
+    if (totalPages <= 0) {
+      totalPages = 1;
+    }
 
     // Perform the database query with optional ordering and pagination
     const query = db
@@ -91,8 +94,8 @@ export async function GET(req: NextRequest) {
       .offset(offset)
       .limit(take);
 
-    if (orderby) {
-      if (orderby == "latest") {
+    if (order) {
+      if (order !== "latest") {
         query.orderBy(desc($tasks.updatedAt));
       } else {
         query.orderBy($tasks.updatedAt);

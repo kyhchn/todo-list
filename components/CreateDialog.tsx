@@ -48,7 +48,7 @@ const CreateDialog = () => {
           description: "Success to create todo",
         });
         revalidateCache("task");
-        router.push("/tasks/" + data["data"]["note_id"]);
+        router.push("/tasks/" + data["data"]["task_id"]);
       },
       onError: (error: Error) => {
         toast({
@@ -96,7 +96,7 @@ const CreateDialog = () => {
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader>Create Note</DialogHeader>
+        <DialogHeader>Create Task</DialogHeader>
         <form onSubmit={handleSubmit}>
           <Input
             placeholder="Name.."

@@ -11,7 +11,18 @@ interface AuthButtonProps {
 }
 
 const AuthButton: React.FC<AuthButtonProps> = ({ provider, buttonText }) => {
-  return <Button onClick={() => signIn(provider)}>{buttonText}</Button>;
+  return (
+    <Button
+      onClick={() =>
+        signIn(provider, {
+          callbackUrl: "/tasks",
+          redirect: true,
+        })
+      }
+    >
+      {buttonText}
+    </Button>
+  );
 };
 
 export default AuthButton;

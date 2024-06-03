@@ -33,9 +33,7 @@ export default function Tasks({ tasks }: TaskProps) {
             );
           })}
         </ul>
-      ) : (
-        <p>No tasks available</p>
-      )}
+      ) : null}
     </div>
   );
 }

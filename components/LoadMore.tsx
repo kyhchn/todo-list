@@ -4,21 +4,21 @@ import React, { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 
 interface LoadMoreStruct {
-  setPage: (val: number) => void;
-  page: number;
+  setPage: () => void;
+  isLoading: boolean;
 }
 
-export default function LoadMore({ setPage, page }: LoadMoreStruct) {
+export default function LoadMore({ setPage, isLoading }: LoadMoreStruct) {
   const { ref, inView } = useInView();
   useEffect(() => {
     if (inView) {
       console.log("Bottom");
-      setPage(page + 1);
+      setPage();
     }
-  }, [inView, page, setPage]);
+  }, [inView]);
   return (
     <div className="flex justify-center items-center p-4" ref={ref}>
-      <Spinner className="animate-spin" />
+      {isLoading ? <Spinner className="animate-spin" /> : <p>No more task</p>}
     </div>
   );
 }

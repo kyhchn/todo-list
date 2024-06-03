@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
       generateBaseResponse({
         success: true,
         data: {
-          note_id: tasks[0].returning_id,
+          task_id: tasks[0].returning_id,
         },
       }),
       {
