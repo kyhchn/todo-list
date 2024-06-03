@@ -30,7 +30,7 @@ export function DeleteButon({ taskId }: { taskId: number }) {
     if (res.ok) {
       setIsOpen(false);
       revalidateCache("task");
-      router.push("/"); // Redirect to homepage or any other page after deletion
+      router.push("/tasks"); // Redirect to homepage or any other page after deletion
     } else {
       // Handle error
     }

@@ -24,3 +24,15 @@ export function generateBaseResponse<T>({
     message,
   };
 }
+
+export function urlParamBuilder(
+  mappedObject: Record<string, any>
+): URLSearchParams {
+  const urlParams = new URLSearchParams();
+  Object.entries(mappedObject).forEach(([key, value]) => {
+    if (value != null) {
+      urlParams.append(key, String(value));
+    }
+  });
+  return urlParams;
+}

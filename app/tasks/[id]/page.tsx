@@ -32,7 +32,7 @@ const Page = async ({ params: { id } }: Props) => {
   return (
     <div className="min-h-screen px-5">
       {task && typeof task === "string" ? (
-        <p>task</p>
+        <p>{task}</p>
       ) : (
         <Task task={task as TaskType} />
       )}

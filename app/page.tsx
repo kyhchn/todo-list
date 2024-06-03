@@ -7,8 +7,7 @@ export default async function Home() {
     <div className="min-h-screen">
       <div className="absolute top-1/2 w-full -translate-y-1/2 md:left-1/2 md:w-auto md:-translate-x-1/2">
         <h1 className="text-center text-4xl font-semibold md:text-7xl">
-          Your todo <span className="text-teal-500">App</span> using{" "}
-          <span className="text-teal-500">AI</span>
+          Your todo <span className="text-teal-500">App</span>
         </h1>
         <h2 className="my-10 text-center text-xl font-semibold text-slate-500 md:text-3xl">
           <TypeWriter />
