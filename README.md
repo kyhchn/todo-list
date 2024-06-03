@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+# Todo-List
 
-First, run the development server:
+Simple todo list app using Nextjs 14.3.2
+
+
+
+
+## Tech Stack
+
+**Client:** React Query, Tailwind CSS, Shadcn, Tiptap Editor
+
+**Server:** NextJS
+
+**DB & Orm:** Drizzle ORM, Neon db
+
+
+## Run Locally
+
+### Clone the project
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+  git clone https://github.com/kyhchn/todo-list
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Go to the project directory
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+  cd todo-list
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Install dependencies
 
-## Learn More
+```bash
+  npm install
+```
+### Setup local env
 
-To learn more about Next.js, take a look at the following resources:
+To run this project, you will need to add the following environment variables to your .env.local file or just copy from .env.example
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+  cp .env.example .env.local
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+`NEON_DATABASE_URL`
 
-## Deploy on Vercel
+`NEXTAUTH_SECRET` -> generate on your machine `$ openssl rand -base64 32`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Google Credential
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+`GOOGLE_CLIENT_ID`
+
+`GOOGLE_CLIENT_SECRET`
+
+Github Credential
+
+`GITHUB_ID`
+
+`GITHUB_SECRET`
+
+YOUR LOCAL ADDRESS `http://localhost:xxxx`
+
+`NEXTAUTH_URL`
+
+`LOCAL_URL`
+
+### Migrate the DB
+make sure drizzle-kit already installed
+```bash
+  npx drizzle-kit push
+```
+
+### Start the server
+
+```bash
+  npm run dev
+```
+
+
+## Demo
+
+https://todo-list-theta-navy.vercel.app/
