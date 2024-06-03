@@ -11,7 +11,7 @@ import CreateDialog from "@/components/CreateDialog";
 
 async function getTasks(page: number) {
   const response = await fetch(
-    `http://localhost:3000/api/task?page=${page}&take=${6}`,
+    `${process.env.LOCAL_URL}/api/task?page=${page}&take=${6}`,
     {
       headers: headers(),
       next: {

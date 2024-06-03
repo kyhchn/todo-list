@@ -32,7 +32,7 @@ const CreateDialog = () => {
 
   const createTaskMutation = useMutation(
     async (formData: FormData) => {
-      const response = await fetch("http://localhost:3000/api/task/create", {
+      const response = await fetch("/api/task/create", {
         method: "POST",
         body: formData,
       });

@@ -10,7 +10,7 @@ type Props = {
 
 async function getTask(id: number) {
   try {
-    const response = await fetch("http://localhost:3000/api/task/" + id, {
+    const response = await fetch(process.env.LOCAL_URL + "/api/task/" + id, {
       headers: headers(),
       next: {
         tags: [`task/${id}`],
