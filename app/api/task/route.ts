@@ -6,15 +6,22 @@ import { count } from "drizzle-orm";
 import { and, desc, eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-const dynamic = "force-dynamic";
-const revalidate = 0;
-export default async function GET(req: NextRequest) {
+
+export async function GET(req: NextRequest) {
   try {
     // check the user
     const session = await getServerSession(authOptions);
 
     if (!session || session.user == null) {
-      return new Response("Unauthorized", { status: 401 });
+      return NextResponse.json(
+        generateBaseResponse({
+          success: false,
+          message: "Unauthorized",
+        }),
+        {
+          status: 401,
+        }
+      );
     }
     const email = session!.user!.email!;
 
@@ -30,25 +37,20 @@ export default async function GET(req: NextRequest) {
       return NextResponse.json(
         generateBaseResponse({
           success: false,
-          message: "user not found",
+          message: "User not found",
         }),
-        { status: 404 }
+        {
+          status: 404,
+        }
       );
     }
     const user = users.shift()!;
 
-    const { title, orderby, page = 1, take = 10 } = await req.json();
-
-    // Validate the parameters
-    if (!title) {
-      return NextResponse.json(
-        generateBaseResponse({
-          success: false,
-          message: "Title parameter is required",
-        }),
-        { status: 400 }
-      );
-    }
+    const { searchParams } = req.nextUrl;
+    const title = searchParams.get("title");
+    const orderby = searchParams.get("orderby");
+    const page = parseInt(searchParams.get("page") || "1");
+    const take = parseInt(searchParams.get("take") || "10");
 
     // Validate the orderby parameter if provided
     const validOrderBys = ["latest", "oldest"];
@@ -58,18 +60,25 @@ export default async function GET(req: NextRequest) {
           success: false,
           message: "Invalid orderby parameter",
         }),
-        { status: 400 }
+        {
+          status: 400,
+        }
       );
     }
 
     const offset = (page - 1) * take;
+
+    const conditions = [eq($tasks.authorId, user.id)];
+    if (title) {
+      conditions.push(eq($tasks.title, title));
+    }
 
     const totalCountResult = await db
       .select({
         count: count(),
       })
       .from($tasks)
-      .where(and(eq($tasks.authorId, user.id), eq($tasks.title, title)));
+      .where(and(...conditions));
 
     const totalCount = totalCountResult[0].count;
     const totalPages = Math.ceil(totalCount / take);
@@ -78,7 +87,7 @@ export default async function GET(req: NextRequest) {
     const query = db
       .select()
       .from($tasks)
-      .where(and(eq($tasks.authorId, user.id), eq($tasks.title, title)))
+      .where(and(...conditions))
       .offset(offset)
       .limit(take);
 
@@ -100,20 +109,22 @@ export default async function GET(req: NextRequest) {
         success: true,
         data: {
           success: true,
-          data: tasks,
+          tasks: tasks,
           totalPages: totalPages,
           page: page,
           take: take,
         },
       }),
-      { status: 200 }
+      {
+        status: 200,
+      }
     );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
       generateBaseResponse({
         success: false,
-        message: "server error",
+        message: "Server error",
       }),
       {
         status: 500,

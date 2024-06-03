@@ -8,8 +8,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(req: NextRequest, res: NextResponse) {
   try {
-    const { id, title, desc, finish = false } = await req.json();
-    if (!Number.isInteger(id)) {
+    const { id, title, desc, finish = false, deadline } = await req.json();
+    if (!parseInt(id)) {
       return new Response("Id not valid", { status: 400 });
     }
     const session = await getServerSession(authOptions);
@@ -38,24 +38,27 @@ export async function PATCH(req: NextRequest, res: NextResponse) {
       );
     }
     const user = users.shift()!;
+    const convertedDeadline = deadline ? new Date(deadline) : undefined;
 
-    const struct: TaskType = {
-      finish: finish,
-      title: title,
-      desc: desc,
-    };
+    // const struct: TaskType = {
+    //   finish: finish,
+    //   title: title,
+    //   desc: desc,
+    // };
 
-    // Filter out keys with null or undefined values
-    const filteredStruct: Partial<TaskType> = Object.fromEntries(
-      Object.entries(struct).filter(([_, value]) => value != null)
-    );
-
-    console.log("Filtered struct is ", filteredStruct);
-
+    // // Filter out keys with null or undefined values
+    // const filteredStruct: Partial<TaskType> = Object.fromEntries(
+    //   Object.entries(struct).filter(([_, value]) => value != null)
+    // );
     const result = (
       await db
         .update($tasks)
-        .set(filteredStruct)
+        .set({
+          finish: finish,
+          desc: desc,
+          title: title,
+          deadline: convertedDeadline,
+        })
         .where(and(eq($tasks.id, id), eq($tasks.authorId, user.id)))
         .returning({
           id: $tasks.id,

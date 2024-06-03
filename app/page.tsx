@@ -1,9 +1,8 @@
 import TypeWriter from "@/components/TypeWriter";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import Link from "next/link";
 
-export default function Home() {
+export default async function Home() {
   return (
     <div className="min-h-screen">
       <div className="absolute top-1/2 w-full -translate-y-1/2 md:left-1/2 md:w-auto md:-translate-x-1/2">
@@ -16,7 +15,7 @@ export default function Home() {
         </h2>
 
         <div className="flex justify-center">
-          <Link href="/dashboard">
+          <Link href="/tasks">
             <Button className="gap-2">{"Let's Go"}</Button>
           </Link>
         </div>

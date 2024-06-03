@@ -20,7 +20,7 @@ export const $users = pgTable("users", {
   updatedAt: timestamp("updated_at")
     .notNull()
     .defaultNow()
-    .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+    .$onUpdate(() => new Date()),
 });
 
 // Define the tasks table
@@ -33,10 +33,11 @@ export const $tasks = pgTable("tasks", {
     onDelete: "cascade",
   }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  deadline: timestamp("deadline").notNull(),
   updatedAt: timestamp("updated_at")
     .notNull()
     .defaultNow()
-    .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+    .$onUpdate(() => new Date()),
 });
 
 // Define relations for the users table

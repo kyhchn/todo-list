@@ -20,6 +20,9 @@ const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+  // pages: {
+  //   signIn: "/auth/sign-in",
+  // },
   callbacks: {
     jwt: async ({ user, token }) => {
       if (user) {
